@@ -1,8 +1,19 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
+	"net"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
+	"github.com/go-chi/chi"
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/websocket"
 	"github.com/kelseyhightower/envconfig"
 	"go.uber.org/zap"
 )
@@ -43,6 +54,52 @@ func main() {
 	if env.Environment == development {
 		logger.Info("configurations loaded successfully", zap.Any("configs", env))
 	}
+
+	listener, err := net.Listen("tcp4", fmt.Sprintf(":%d", env.Port))
+	if err != nil {
+		logger.Fatal("failed binding to port", zap.Int("port", env.Port))
+	}
+	defer listener.Close()
+
+	url := fmt.Sprintf("http://%s", listener.Addr())
+	logger.Info("server listening on ", zap.String("url", url))
+
+	wsUpgrader := &websocket.Upgrader{}
+	_ = wsUpgrader
+	router := chi.NewRouter()
+
+	server := &http.Server{
+		ReadHeaderTimeout: 30 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		Handler:           handlers.CORS(handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}), handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}), handlers.AllowedOrigins([]string{"*"}))(router),
+	}
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
+
+	idleConnsClosed := make(chan struct{})
+	go func() {
+		defer close(idleConnsClosed)
+
+		recv := <-sigs
+		logger.Info("received signal, shutting down", zap.Any("signal", recv.String))
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := server.Shutdown(ctx); err != nil {
+			logger.Warn("error shutting down server", zap.Error(err))
+		}
+	}()
+
+	if err = server.Serve(listener); err != nil {
+		if err != http.ErrServerClosed {
+			logger.Fatal("server returned error", zap.Error(err))
+		}
+	}
+
+	<-idleConnsClosed
+	logger.Info("server shutdown successfully")
 }
 
 func failOnError(msg string, err error) {
