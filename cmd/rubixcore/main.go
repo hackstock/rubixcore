@@ -11,9 +11,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-chi/chi"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
+	"github.com/hackstock/rubixcore/pkg/api"
 	"github.com/kelseyhightower/envconfig"
 	"go.uber.org/zap"
 )
@@ -64,9 +64,7 @@ func main() {
 	url := fmt.Sprintf("http://%s", listener.Addr())
 	logger.Info("server listening on ", zap.String("url", url))
 
-	wsUpgrader := &websocket.Upgrader{}
-	_ = wsUpgrader
-	router := chi.NewRouter()
+	router := api.InitRoutes(&websocket.Upgrader{}, logger)
 
 	server := &http.Server{
 		ReadHeaderTimeout: 30 * time.Second,
