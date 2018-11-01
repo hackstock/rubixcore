@@ -20,7 +20,9 @@ services:
       - .env-mysql
   rabbitmq:
     image: rabbitmq:3-management
+    restart: always
     ports: 
+      - "5672:5672"
       - "15672:15672"
     env_file: 
       - .env-rabbitmq

@@ -15,6 +15,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/hackstock/rubixcore/pkg/api"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 )
 
@@ -28,6 +29,7 @@ var env = struct {
 	Environment      string `envconfig:"ENVIRONMENT" default:"development"`
 	TicketsResetTime string `envconfig:"TICKETS_RESET_TIME" required:"true"`
 	ServiceDSN       string `envconfig:"SERVICE_DSN" required:"true"`
+	RabbitMQURL      string `envconfig:"RABBITMQ_URL" required:"true"`
 	JWTIssuer        string `envconfig:"JWT_ISSUER" required:"true"`
 	JWTSecret        string `envconfig:"JWT_SECRET" required:"true"`
 }{}
@@ -55,6 +57,11 @@ func main() {
 		logger.Info("configurations loaded successfully", zap.Any("configs", env))
 	}
 
+	conn, err := amqp.Dial(env.RabbitMQURL)
+	failOnError("failed connecting to rabbitmq", err)
+
+	logger.Info("connected to rabbitmq successfully")
+
 	listener, err := net.Listen("tcp4", fmt.Sprintf(":%d", env.Port))
 	if err != nil {
 		logger.Fatal("failed binding to port", zap.Int("port", env.Port))
@@ -64,7 +71,7 @@ func main() {
 	url := fmt.Sprintf("http://%s", listener.Addr())
 	logger.Info("server listening on ", zap.String("url", url))
 
-	router := api.InitRoutes(&websocket.Upgrader{}, logger)
+	router := api.InitRoutes(conn, &websocket.Upgrader{}, logger)
 
 	server := &http.Server{
 		ReadHeaderTimeout: 30 * time.Second,
