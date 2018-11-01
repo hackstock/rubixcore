@@ -4,6 +4,8 @@ REPO=github.com/hackstock/${NAME}
 BINARY=${NAME}
 BINARY_SRC=$(REPO)/cmd/${NAME}
 BUILD_DIR?=$(CURDIR)/out
+GOOS ?= linux
+GOARCH ?= amd64
 GO_LINKER_FLAGS=-ldflags="-s -w"
 
 NO_COLOR=\033[0m
