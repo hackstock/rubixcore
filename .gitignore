@@ -17,3 +17,6 @@ coverage.txt
 
 # Build directory
 out/
+
+# VS Code
+.vscode/
