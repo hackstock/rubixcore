@@ -11,9 +11,11 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
 	"github.com/hackstock/rubixcore/pkg/api"
+	"github.com/jmoiron/sqlx"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
@@ -57,10 +59,19 @@ func main() {
 		logger.Info("configurations loaded successfully", zap.Any("configs", env))
 	}
 
-	conn, err := amqp.Dial(env.RabbitMQURL)
+	brokerConn, err := amqp.Dial(env.RabbitMQURL)
 	failOnError("failed connecting to rabbitmq", err)
 
 	logger.Info("connected to rabbitmq successfully")
+
+	dbConn, err := sqlx.Open("mysql", env.ServiceDSN)
+	failOnError("failed connecting to mysql", err)
+
+	logger.Info("connected to mysql successfully")
+
+	dbConn.SetConnMaxLifetime(time.Second * 14400)
+	dbConn.SetMaxIdleConns(50)
+	dbConn.SetMaxOpenConns(100)
 
 	listener, err := net.Listen("tcp4", fmt.Sprintf(":%d", env.Port))
 	if err != nil {
@@ -71,7 +82,12 @@ func main() {
 	url := fmt.Sprintf("http://%s", listener.Addr())
 	logger.Info("server listening on ", zap.String("url", url))
 
-	router := api.InitRoutes(conn, &websocket.Upgrader{}, logger)
+	router := api.InitRoutes(
+		brokerConn, 
+		dbConn,
+		&websocket.Upgrader{},
+		 logger,
+	)
 
 	server := &http.Server{
 		ReadHeaderTimeout: 30 * time.Second,
