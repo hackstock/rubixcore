@@ -206,3 +206,69 @@ func TestGetAllCustomerUnserved_ShouldFail(t *testing.T) {
 		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
 }
+
+func TestMarkAsServedCustomer_ShouldPass(t *testing.T) {
+	query := `^UPDATE customers SET served_at = CURRENT_TIMESTAMP\(\), served_by = \? WHERE id = \?$`
+
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	custId := 1
+	userId := 2
+
+	mock.ExpectExec(query).
+		WithArgs(
+			custId,
+			userId,
+		).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	dbMock := sqlx.NewDb(db, "sqlmock")
+	customersRepo := NewCustomersRepo(dbMock)
+
+	err = customersRepo.MarkAsServed(custId, userId)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	err = mock.ExpectationsWereMet()
+	if err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestMarkAsServedCustomer_ShouldFail(t *testing.T) {
+	query := `^UPDATE customers SET served_at = CURRENT_TIMESTAMP\(\), served_by = \? WHERE id = \?$`
+
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	custId := 1
+	userId := 2
+
+	mock.ExpectExec(query).
+		WithArgs(
+			custId,
+			userId,
+		).
+		WillReturnError(fmt.Errorf("db error"))
+
+	dbMock := sqlx.NewDb(db, "sqlmock")
+	customersRepo := NewCustomersRepo(dbMock)
+
+	err = customersRepo.MarkAsServed(custId, userId)
+	if err == nil {
+		t.Fatalf("expected error, got none")
+	}
+
+	err = mock.ExpectationsWereMet()
+	if err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}

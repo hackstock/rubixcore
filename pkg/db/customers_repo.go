@@ -65,10 +65,10 @@ func (repo *CustomersRepo) GetUnserved() ([]*Customer, error) {
 }
 
 // MarkAsServed marks a customer as served in the database
-func (repo *CustomersRepo) MarkAsServed(id int) error {
+func (repo *CustomersRepo) MarkAsServed(custId, userId int) error {
 	query := "UPDATE customers SET served_at = CURRENT_TIMESTAMP(), served_by = ? WHERE id = ?"
 
-	_, err := repo.db.Exec(query, id)
+	_, err := repo.db.Exec(query, custId, userId)
 
 	return err
 }
