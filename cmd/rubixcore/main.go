@@ -34,6 +34,7 @@ var env = struct {
 	RabbitMQURL      string `envconfig:"RABBITMQ_URL" required:"true"`
 	JWTIssuer        string `envconfig:"JWT_ISSUER" required:"true"`
 	JWTSecret        string `envconfig:"JWT_SECRET" required:"true"`
+	Company 		 string `envconfig:"COMPANY"`
 }{}
 
 func init() {
