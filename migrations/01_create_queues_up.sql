@@ -12,5 +12,5 @@ CREATE TABLE IF NOT EXISTS queues
     PRIMARY KEY(id)
 );
 
--- name: create-username-index
+-- name: create-queues-name-index
 CREATE UNIQUE INDEX queues_name_index ON queues(name);
