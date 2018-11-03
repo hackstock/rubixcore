@@ -67,6 +67,9 @@ func main() {
 	dbConn, err := sqlx.Open("mysql", env.ServiceDSN)
 	failOnError("failed connecting to mysql", err)
 
+	err = dbConn.Ping()
+	failOnError("failed pinging mysql", err)
+
 	logger.Info("connected to mysql successfully")
 
 	dbConn.SetConnMaxLifetime(time.Second * 14400)
@@ -83,10 +86,10 @@ func main() {
 	logger.Info("server listening on ", zap.String("url", url))
 
 	router := api.InitRoutes(
-		brokerConn, 
+		brokerConn,
 		dbConn,
 		&websocket.Upgrader{},
-		 logger,
+		logger,
 	)
 
 	server := &http.Server{
