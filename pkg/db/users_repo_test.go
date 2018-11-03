@@ -61,7 +61,7 @@ func TestComparePasswords(t *testing.T) {
 	}
 }
 
-func TestCreate_ShouldPass(t *testing.T) {
+func TestCreateUserAccount_ShouldPass(t *testing.T) {
 	query := `^INSERT INTO user_accounts \(username, password, is_admin\) VALUES \(\?, \?, \?\)$`
 
 	db, mock, err := sqlmock.New()
@@ -94,7 +94,7 @@ func TestCreate_ShouldPass(t *testing.T) {
 	}
 }
 
-func TestCreate_ShouldFail(t *testing.T) {
+func TestCreateUserAccount_ShouldFail(t *testing.T) {
 	query := `^INSERT INTO user_accounts \(username, password, is_admin\) VALUES \(\?, \?, \?\)$`
 
 	db, mock, err := sqlmock.New()
@@ -127,7 +127,7 @@ func TestCreate_ShouldFail(t *testing.T) {
 	}
 }
 
-func TestGetAll_ShouldPass(t *testing.T) {
+func TestGetAllUserAccount_ShouldPass(t *testing.T) {
 	query := `^SELECT \* FROM user_accounts$`
 
 	db, mock, err := sqlmock.New()
@@ -158,7 +158,7 @@ func TestGetAll_ShouldPass(t *testing.T) {
 	}
 }
 
-func TestGetAll_ShouldFail(t *testing.T) {
+func TestGetAllUserAccount_ShouldFail(t *testing.T) {
 	query := `^SELECT \* FROM user_accounts$`
 
 	db, mock, err := sqlmock.New()
@@ -185,7 +185,7 @@ func TestGetAll_ShouldFail(t *testing.T) {
 	}
 }
 
-func TestAuthenticate_ShouldPass(t *testing.T) {
+func TestAuthenticateUserAccount_ShouldPass(t *testing.T) {
 	query := `^SELECT \* FROM user_accounts AS u WHERE u.username = \? AND u.password = \?$`
 
 	db, mock, err := sqlmock.New()
@@ -219,7 +219,7 @@ func TestAuthenticate_ShouldPass(t *testing.T) {
 	}
 }
 
-func TestAuthenticate_ShouldFail(t *testing.T) {
+func TestAuthenticateUserAccount_ShouldFail(t *testing.T) {
 	query := `^SELECT \* FROM user_accounts AS u WHERE u.username = \? AND u.password = \?$`
 
 	db, mock, err := sqlmock.New()
@@ -255,7 +255,7 @@ func TestAuthenticate_ShouldFail(t *testing.T) {
 	}
 }
 
-func TestUpdateLastLogin_ShouldPass(t *testing.T) {
+func TestUpdateLastLoginUserAccount_ShouldPass(t *testing.T) {
 	query := `^UPDATE user_accounts SET last_login_at = CURRENT_TIMESTAMP\(\) WHERE id = \?$`
 
 	db, mock, err := sqlmock.New()
@@ -285,7 +285,7 @@ func TestUpdateLastLogin_ShouldPass(t *testing.T) {
 	}
 }
 
-func TestUpdateLastLogin_ShouldFail(t *testing.T) {
+func TestUpdateLastLoginUserAccount_ShouldFail(t *testing.T) {
 	query := `^UPDATE user_accounts SET last_login_at = CURRENT_TIMESTAMP\(\) WHERE id = \?$`
 
 	db, mock, err := sqlmock.New()
