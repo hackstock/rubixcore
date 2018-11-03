@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // UserAccount models a user in the db
@@ -70,17 +69,4 @@ func (repo *UsersRepo) GetAll() ([]*UserAccount, error) {
 	}
 
 	return accounts, nil
-}
-
-func hashPassword(pwd string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.MinCost)
-	if err != nil {
-		return "", err
-	}
-
-	return string(hash), nil
-}
-
-func comparePasswords(hashedPwd string, plainPwd string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPwd), []byte(plainPwd)) == nil
 }
