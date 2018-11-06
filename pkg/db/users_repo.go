@@ -27,12 +27,12 @@ func NewUsersRepo(db *sqlx.DB) *UsersRepo {
 	return &UsersRepo{db}
 }
 
-// Authenticate returns a user with the specified login credentials
-func (repo *UsersRepo) Authenticate(username, password string) (*UserAccount, error) {
-	query := "SELECT * FROM user_accounts AS u WHERE u.username = ? AND u.password = ?"
+// GetByUsername returns a user with the specified username
+func (repo *UsersRepo) GetByUsername(username string) (*UserAccount, error) {
+	query := "SELECT * FROM user_accounts AS u WHERE u.username = ?"
 
 	u := new(UserAccount)
-	err := repo.db.QueryRowx(query, username, password).StructScan(u)
+	err := repo.db.QueryRowx(query, username).StructScan(u)
 	if err != nil {
 		return nil, err
 	}

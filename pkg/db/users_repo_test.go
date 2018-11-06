@@ -134,7 +134,7 @@ func TestGetAllUserAccount_ShouldFail(t *testing.T) {
 }
 
 func TestAuthenticateUserAccount_ShouldPass(t *testing.T) {
-	query := `^SELECT \* FROM user_accounts AS u WHERE u.username = \? AND u.password = \?$`
+	query := `^SELECT \* FROM user_accounts AS u WHERE u.username = \?$`
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -143,11 +143,9 @@ func TestAuthenticateUserAccount_ShouldPass(t *testing.T) {
 	defer db.Close()
 
 	username := "someuser"
-	password := "somepassword"
 
 	mock.ExpectQuery(query).WithArgs(
 		username,
-		password,
 	).WillReturnRows(
 		sqlmock.NewRows([]string{"id", "username", "password", "is_admin", "created_at", "last_login_at", "updated_at"}).
 			AddRow(1, username, "$2a$10$pJofeBaFtdXo4RdRrKBJF.FW/ePvnS3.xgNpdC0N4FNt2S1H3QO2K", false, time.Now(), nil, nil),
@@ -156,7 +154,7 @@ func TestAuthenticateUserAccount_ShouldPass(t *testing.T) {
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	repo := NewUsersRepo(dbMock)
 
-	_, err = repo.Authenticate(username, password)
+	_, err = repo.GetByUsername(username)
 	if err != nil {
 		t.Fatalf("expected not error, got %v", err)
 	}
@@ -168,7 +166,7 @@ func TestAuthenticateUserAccount_ShouldPass(t *testing.T) {
 }
 
 func TestAuthenticateUserAccount_ShouldFail(t *testing.T) {
-	query := `^SELECT \* FROM user_accounts AS u WHERE u.username = \? AND u.password = \?$`
+	query := `^SELECT \* FROM user_accounts AS u WHERE u.username = \?$`
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -177,18 +175,16 @@ func TestAuthenticateUserAccount_ShouldFail(t *testing.T) {
 	defer db.Close()
 
 	username := "someuser"
-	password := "somepassword"
 
 	mock.ExpectQuery(query).WithArgs(
 		username,
-		password,
 	).
 		WillReturnError(fmt.Errorf("db error"))
 
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	repo := NewUsersRepo(dbMock)
 
-	user, err := repo.Authenticate(username, password)
+	user, err := repo.GetByUsername(username)
 	if err == nil {
 		t.Fatalf("expected error, got none")
 	}

@@ -19,9 +19,9 @@ func InitRoutes(
 	router := chi.NewRouter()
 	router.Use(
 		middleware.Logger,
-		middleware.DefaultCompress,
+		/*middleware.DefaultCompress,
 		middleware.RedirectSlashes,
-		middleware.Recoverer,
+		middleware.Recoverer,*/
 	)
 
 	router.Mount("/users", usersRoutes(dbConn, logger))

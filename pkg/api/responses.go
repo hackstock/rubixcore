@@ -21,7 +21,7 @@ func handleError(
 	code int,
 ) {
 	logger.Warn(msg, zap.Error(err))
-	http.Error(w, err.Error(), code)
+	http.Error(w, msg, code)
 }
 
 func handleBadRequest(
