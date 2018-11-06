@@ -7,9 +7,9 @@ CREATE TABLE IF NOT EXISTS user_accounts
     username        VARCHAR(255)   NOT NULL,
     password        VARCHAR(255)   NOT NULL,
     is_admin        BOOLEAN        DEFAULT FALSE,
-    created_at      TIMESTAMP      DEFAULT CURRENT_TIMESTAMP(),
-    last_login_at   TIMESTAMP      NULL,
-    updated_at      TIMESTAMP      NULL,      
+    created_at      DATETIME       DEFAULT NOW(),
+    last_login_at   DATETIME       NULL,
+    updated_at      DATETIME       NULL,      
     PRIMARY KEY(id)
 );
 

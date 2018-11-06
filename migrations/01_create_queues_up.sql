@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS queues
     name            VARCHAR(255)   NOT NULL,
     description     VARCHAR(255)   NOT NULL,
     is_active       BOOLEAN        DEFAULT FALSE,
-    created_at      TIMESTAMP      DEFAULT CURRENT_TIMESTAMP(),
+    created_at      DATETIME       DEFAULT NOW(),
     updated_at      TIMESTAMP      NULL,      
     PRIMARY KEY(id)
 );
