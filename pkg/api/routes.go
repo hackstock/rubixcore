@@ -1,8 +1,6 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/go-chi/chi"
 	"github.com/gorilla/websocket"
 	"github.com/jmoiron/sqlx"
@@ -16,7 +14,7 @@ func InitRoutes(
 	dbConn *sqlx.DB,
 	upgrader *websocket.Upgrader,
 	logger *zap.Logger,
-) http.Handler {
+) *chi.Mux {
 	router := chi.NewRouter()
 
 	return router
