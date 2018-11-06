@@ -62,11 +62,13 @@ func main() {
 
 	brokerConn, err := amqp.Dial(env.RabbitMQURL)
 	failOnError("failed connecting to rabbitmq", err)
+	defer brokerConn.Close()
 
 	logger.Info("connected to rabbitmq successfully")
 
 	dbConn, err := sqlx.Open("mysql", env.ServiceDSN)
 	failOnError("failed connecting to mysql", err)
+	defer dbConn.Close()
 
 	err = dbConn.Ping()
 	failOnError("failed pinging mysql", err)
