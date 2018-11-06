@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/websocket"
 	"github.com/jmoiron/sqlx"
 	"github.com/streadway/amqp"
@@ -16,6 +17,14 @@ func InitRoutes(
 	logger *zap.Logger,
 ) *chi.Mux {
 	router := chi.NewRouter()
+	router.Use(
+		middleware.Logger,
+		middleware.DefaultCompress,
+		middleware.RedirectSlashes,
+		middleware.Recoverer,
+	)
+
+	router.Mount("/users", usersRoutes(dbConn, logger))
 
 	return router
 }

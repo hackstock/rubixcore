@@ -3,6 +3,7 @@ module github.com/hackstock/rubixcore
 require (
 	github.com/DATA-DOG/go-sqlmock v1.3.0
 	github.com/go-chi/chi v3.3.3+incompatible
+	github.com/go-chi/render v1.0.1
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/gorilla/handlers v1.4.0
 	github.com/gorilla/websocket v1.4.0
