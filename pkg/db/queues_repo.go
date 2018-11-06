@@ -29,7 +29,7 @@ func NewQueuesRepo(db *sqlx.DB) *QueuesRepo {
 
 // Create saves a queue into the database
 func (repo *QueuesRepo) Create(q *Queue) error {
-	query := "INSERT INTO queues (name, description) VALUES (?, ?, ?)"
+	query := "INSERT INTO queues (name, description) VALUES (?, ?)"
 	_, err := repo.db.Exec(query, q.Name, q.Description)
 
 	return err

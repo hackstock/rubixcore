@@ -10,7 +10,7 @@ import (
 )
 
 func TestCreateQueue_ShouldPass(t *testing.T) {
-	query := `^INSERT INTO queues \(name, description\) VALUES \(\?, \?, \?\)$`
+	query := `^INSERT INTO queues \(name, description\) VALUES \(\?, \?\)$`
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -42,7 +42,7 @@ func TestCreateQueue_ShouldPass(t *testing.T) {
 }
 
 func TestCreateQueue_ShouldFail(t *testing.T) {
-	query := `^INSERT INTO queues \(name, description\) VALUES \(\?, \?, \?\)$`
+	query := `^INSERT INTO queues \(name, description\) VALUES \(\?, \?\)$`
 
 	db, mock, err := sqlmock.New()
 	if err != nil {

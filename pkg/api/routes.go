@@ -25,6 +25,7 @@ func InitRoutes(
 	)
 
 	router.Mount("/users", usersRoutes(dbConn, logger))
+	router.Mount("/queues", queuesRoutes(dbConn, logger))
 
 	return router
 }
