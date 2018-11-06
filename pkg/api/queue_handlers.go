@@ -31,9 +31,23 @@ func createQueue(dbConn *sqlx.DB, logger *zap.Logger) http.HandlerFunc {
 	}
 }
 
+func getAllQueues(dbConn *sqlx.DB, logger *zap.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		repo := db.NewQueuesRepo(dbConn)
+		queues, err := repo.GetAll()
+		if err != nil {
+			handleServerError(w, "failed fetching all queues", err, logger)
+			return
+		}
+
+		render.JSON(w, r, Response{Data: queues})
+	}
+}
+
 func queuesRoutes(dbConn *sqlx.DB, logger *zap.Logger) *chi.Mux {
 	router := chi.NewRouter()
 	router.Post("/", createQueue(dbConn, logger))
+	router.Get("/", getAllQueues(dbConn, logger))
 
 	return router
 }
