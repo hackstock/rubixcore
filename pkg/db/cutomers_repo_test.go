@@ -142,7 +142,7 @@ func TestGetAllCustomer_ShouldFail(t *testing.T) {
 }
 
 func TestGetAllCustomerUnserved_ShouldPass(t *testing.T) {
-	query := `^SELECT c.\* FROM customers AS c WHERE c.served_at = NULL$`
+	query := `^SELECT c.\* FROM customers AS c WHERE c.served_at IS NULL$`
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -177,7 +177,7 @@ func TestGetAllCustomerUnserved_ShouldPass(t *testing.T) {
 }
 
 func TestGetAllCustomerUnserved_ShouldFail(t *testing.T) {
-	query := `^SELECT c.\* FROM customers AS c WHERE c.served_at = NULL$`
+	query := `^SELECT c.\* FROM customers AS c WHERE c.served_at IS NULL$`
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -208,7 +208,7 @@ func TestGetAllCustomerUnserved_ShouldFail(t *testing.T) {
 }
 
 func TestMarkAsServedCustomer_ShouldPass(t *testing.T) {
-	query := `^UPDATE customers SET served_at = CURRENT_TIMESTAMP\(\), served_by = \? WHERE id = \?$`
+	query := `^UPDATE customers SET served_at = NOW\(\), served_by = \? WHERE id = \?$`
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -216,20 +216,20 @@ func TestMarkAsServedCustomer_ShouldPass(t *testing.T) {
 	}
 	defer db.Close()
 
-	custId := 1
-	userId := 2
+	custID := 1
+	userID := 2
 
 	mock.ExpectExec(query).
 		WithArgs(
-			custId,
-			userId,
+			custID,
+			userID,
 		).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	customersRepo := NewCustomersRepo(dbMock)
 
-	err = customersRepo.MarkAsServed(custId, userId)
+	err = customersRepo.MarkAsServed(custID, userID)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -241,7 +241,7 @@ func TestMarkAsServedCustomer_ShouldPass(t *testing.T) {
 }
 
 func TestMarkAsServedCustomer_ShouldFail(t *testing.T) {
-	query := `^UPDATE customers SET served_at = CURRENT_TIMESTAMP\(\), served_by = \? WHERE id = \?$`
+	query := `^UPDATE customers SET served_at = NOW\(\), served_by = \? WHERE id = \?$`
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -249,20 +249,20 @@ func TestMarkAsServedCustomer_ShouldFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	custId := 1
-	userId := 2
+	custID := 1
+	userID := 2
 
 	mock.ExpectExec(query).
 		WithArgs(
-			custId,
-			userId,
+			custID,
+			userID,
 		).
 		WillReturnError(fmt.Errorf("db error"))
 
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	customersRepo := NewCustomersRepo(dbMock)
 
-	err = customersRepo.MarkAsServed(custId, userId)
+	err = customersRepo.MarkAsServed(custID, userID)
 	if err == nil {
 		t.Fatalf("expected error, got none")
 	}

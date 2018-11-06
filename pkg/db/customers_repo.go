@@ -53,7 +53,7 @@ func (repo *CustomersRepo) GetAll() ([]*Customer, error) {
 // GetUnserved fetches and return all customers from the database
 // that have not been served yet
 func (repo *CustomersRepo) GetUnserved() ([]*Customer, error) {
-	query := "SELECT c.* FROM customers AS c WHERE c.served_at = NULL"
+	query := "SELECT c.* FROM customers AS c WHERE c.served_at IS NULL"
 
 	var customers []*Customer
 	err := repo.db.Select(&customers, query)
@@ -65,10 +65,10 @@ func (repo *CustomersRepo) GetUnserved() ([]*Customer, error) {
 }
 
 // MarkAsServed marks a customer as served in the database
-func (repo *CustomersRepo) MarkAsServed(custId, userId int) error {
-	query := "UPDATE customers SET served_at = CURRENT_TIMESTAMP(), served_by = ? WHERE id = ?"
+func (repo *CustomersRepo) MarkAsServed(custID, userID int) error {
+	query := "UPDATE customers SET served_at = NOW(), served_by = ? WHERE id = ?"
 
-	_, err := repo.db.Exec(query, custId, userId)
+	_, err := repo.db.Exec(query, custID, userID)
 
 	return err
 }
