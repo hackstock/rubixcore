@@ -32,7 +32,7 @@ func (wl *WaitList) Enqueue(c *CustomerInfo) {
 }
 
 // Deque returns the customer info at the head of the waiting list
-func (wl *WaitList) Deque(c *CustomerInfo) *CustomerInfo {
+func (wl *WaitList) Deque() *CustomerInfo {
 	wl.lock.Lock()
 	customerInfo := wl.Items[0]
 	wl.Items = wl.Items[1:len(wl.Items)]
