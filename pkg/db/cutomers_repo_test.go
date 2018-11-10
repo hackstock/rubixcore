@@ -85,11 +85,11 @@ func TestGetAllCustomer_ShouldPass(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectQuery(query).WithArgs().WillReturnRows(
-		sqlmock.NewRows([]string{"id", "msisdn", "ticket", "queue_id", "created_at", "served_by", "served_at"}).
-			AddRow(1, "+233200662782", "A101", 1, time.Now(), 1, time.Now()).
-			AddRow(2, "+233200662783", "A201", 2, time.Now(), 2, time.Now()).
-			AddRow(3, "+233200662784", "A103", 3, time.Now(), 1, time.Now()).
-			AddRow(4, "+233200662785", "A141", 1, time.Now(), 2, time.Now()),
+		sqlmock.NewRows([]string{"id", "msisdn", "ticket", "queue_id", "created_at", "served_at"}).
+			AddRow(1, "+233200662782", "A101", 1, time.Now(), time.Now()).
+			AddRow(2, "+233200662783", "A201", 2, time.Now(), time.Now()).
+			AddRow(3, "+233200662784", "A103", 3, time.Now(), time.Now()).
+			AddRow(4, "+233200662785", "A141", 1, time.Now(), time.Now()),
 	)
 
 	dbMock := sqlx.NewDb(db, "sqlmock")
@@ -151,11 +151,11 @@ func TestGetAllCustomerUnserved_ShouldPass(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectQuery(query).WithArgs().WillReturnRows(
-		sqlmock.NewRows([]string{"id", "msisdn", "ticket", "queue_id", "created_at", "served_by", "served_at"}).
-			AddRow(1, "+233200662782", "A101", 1, time.Now(), 1, nil).
-			AddRow(2, "+233200662783", "A201", 2, time.Now(), 2, nil).
-			AddRow(3, "+233200662784", "A103", 3, time.Now(), 1, nil).
-			AddRow(4, "+233200662785", "A141", 1, time.Now(), 2, nil),
+		sqlmock.NewRows([]string{"id", "msisdn", "ticket", "queue_id", "created_at", "served_at"}).
+			AddRow(1, "+233200662782", "A101", 1, time.Now(), nil).
+			AddRow(2, "+233200662783", "A201", 2, time.Now(), nil).
+			AddRow(3, "+233200662784", "A103", 3, time.Now(), nil).
+			AddRow(4, "+233200662785", "A141", 1, time.Now(), nil),
 	)
 
 	dbMock := sqlx.NewDb(db, "sqlmock")
@@ -208,7 +208,7 @@ func TestGetAllCustomerUnserved_ShouldFail(t *testing.T) {
 }
 
 func TestMarkAsServedCustomer_ShouldPass(t *testing.T) {
-	query := `^UPDATE customers SET served_at = NOW\(\), served_by = \? WHERE id = \?$`
+	query := `^UPDATE customers SET served_at = NOW\(\) WHERE id = \?$`
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -217,19 +217,17 @@ func TestMarkAsServedCustomer_ShouldPass(t *testing.T) {
 	defer db.Close()
 
 	custID := 1
-	userID := 2
 
 	mock.ExpectExec(query).
 		WithArgs(
 			custID,
-			userID,
 		).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	customersRepo := NewCustomersRepo(dbMock)
 
-	err = customersRepo.MarkAsServed(custID, userID)
+	err = customersRepo.MarkAsServed(custID)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -241,7 +239,7 @@ func TestMarkAsServedCustomer_ShouldPass(t *testing.T) {
 }
 
 func TestMarkAsServedCustomer_ShouldFail(t *testing.T) {
-	query := `^UPDATE customers SET served_at = NOW\(\), served_by = \? WHERE id = \?$`
+	query := `^UPDATE customers SET served_at = NOW\(\) WHERE id = \?$`
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -250,19 +248,17 @@ func TestMarkAsServedCustomer_ShouldFail(t *testing.T) {
 	defer db.Close()
 
 	custID := 1
-	userID := 2
 
 	mock.ExpectExec(query).
 		WithArgs(
 			custID,
-			userID,
 		).
 		WillReturnError(fmt.Errorf("db error"))
 
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	customersRepo := NewCustomersRepo(dbMock)
 
-	err = customersRepo.MarkAsServed(custID, userID)
+	err = customersRepo.MarkAsServed(custID)
 	if err == nil {
 		t.Fatalf("expected error, got none")
 	}

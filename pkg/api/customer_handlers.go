@@ -62,7 +62,6 @@ func markAsServed(dbConn *sqlx.DB, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var payload = struct {
 			CustomerID int `json:"customerId"`
-			UserID     int `json:"userId"`
 		}{}
 
 		err := json.NewDecoder(r.Body).Decode(&payload)
@@ -72,7 +71,7 @@ func markAsServed(dbConn *sqlx.DB, logger *zap.Logger) http.HandlerFunc {
 		}
 
 		repo := db.NewCustomersRepo(dbConn)
-		err = repo.MarkAsServed(payload.CustomerID, payload.UserID)
+		err = repo.MarkAsServed(payload.CustomerID)
 		if err != nil {
 			handleServerError(w, "failed marking customer as served", err, logger)
 			return

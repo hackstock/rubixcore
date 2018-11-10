@@ -13,7 +13,6 @@ type Customer struct {
 	Ticket    string     `db:"ticket" json:"ticket"`
 	QueueID   int        `db:"queue_id" json:"queueId"`
 	CreatedAt *time.Time `db:"created_at" json:"createdAt"`
-	ServedBy  int        `db:"served_by" json:"servedBy"`
 	ServedAt  *time.Time `db:"served_at" json:"servedAt"`
 }
 
@@ -65,10 +64,10 @@ func (repo *CustomersRepo) GetUnserved() ([]*Customer, error) {
 }
 
 // MarkAsServed marks a customer as served in the database
-func (repo *CustomersRepo) MarkAsServed(custID, userID int) error {
-	query := "UPDATE customers SET served_at = NOW(), served_by = ? WHERE id = ?"
+func (repo *CustomersRepo) MarkAsServed(custID int) error {
+	query := "UPDATE customers SET served_at = NOW() WHERE id = ?"
 
-	_, err := repo.db.Exec(query, custID, userID)
+	_, err := repo.db.Exec(query, custID)
 
 	return err
 }
