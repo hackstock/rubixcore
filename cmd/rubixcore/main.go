@@ -15,6 +15,8 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
 	"github.com/hackstock/rubixcore/pkg/api"
+	"github.com/hackstock/rubixcore/pkg/app"
+	"github.com/hackstock/rubixcore/pkg/db"
 	"github.com/jmoiron/sqlx"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/streadway/amqp"
@@ -34,7 +36,7 @@ var env = struct {
 	RabbitMQURL      string `envconfig:"RABBITMQ_URL" required:"true"`
 	JWTIssuer        string `envconfig:"JWT_ISSUER" required:"true"`
 	JWTSecret        string `envconfig:"JWT_SECRET" required:"true"`
-	Company 		 string `envconfig:"COMPANY"`
+	Company          string `envconfig:"COMPANY"`
 }{}
 
 func init() {
@@ -79,6 +81,17 @@ func main() {
 	dbConn.SetMaxIdleConns(50)
 	dbConn.SetMaxOpenConns(100)
 
+	queuesRepo := db.NewQueuesRepo(dbConn)
+	queues, err := queuesRepo.GetActive()
+	failOnError("failed fetching active queues", err)
+
+	var waitLists map[int]*app.WaitList
+	for _, queue := range queues {
+		waitLists[queue.ID] = app.NewWaitList()
+	}
+
+	rubix := app.NewRubix(waitLists, logger)
+
 	listener, err := net.Listen("tcp4", fmt.Sprintf(":%d", env.Port))
 	if err != nil {
 		logger.Fatal("failed binding to port", zap.Int("port", env.Port))
@@ -89,6 +102,7 @@ func main() {
 	logger.Info("server listening on ", zap.String("url", url))
 
 	router := api.InitRoutes(
+		rubix,
 		brokerConn,
 		dbConn,
 		&websocket.Upgrader{},

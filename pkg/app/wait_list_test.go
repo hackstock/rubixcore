@@ -15,9 +15,9 @@ func TestWaitList(t *testing.T) {
 		t.Errorf("expected a size of 0, got %d", waitList.Size())
 	}
 
-	ciOne := CustomerInfo{ID: 1, Msisdn: "+233200662782", Ticket: "A100"}
-	ciTwo := CustomerInfo{ID: 2, Msisdn: "+233200662783", Ticket: "A200"}
-	ciThree := CustomerInfo{ID: 3, Msisdn: "+233200662789", Ticket: "A300"}
+	ciOne := CustomerInfo{Msisdn: "+233200662782", Ticket: "A100"}
+	ciTwo := CustomerInfo{Msisdn: "+233200662783", Ticket: "A200"}
+	ciThree := CustomerInfo{Msisdn: "+233200662789", Ticket: "A300"}
 
 	waitList.Enqueue(&ciOne)
 	if waitList.Size() != 1 {

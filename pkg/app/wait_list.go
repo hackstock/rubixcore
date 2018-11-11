@@ -5,7 +5,6 @@ import "sync"
 // CustomerInfo stores relevant information
 // about a customer that needs to be placed on a wait list
 type CustomerInfo struct {
-	ID     int
 	Msisdn string
 	Ticket string
 }
