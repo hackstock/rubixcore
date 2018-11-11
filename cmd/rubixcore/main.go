@@ -85,7 +85,7 @@ func main() {
 	queues, err := queuesRepo.GetActive()
 	failOnError("failed fetching active queues", err)
 
-	var waitLists map[int]*app.WaitList
+	waitLists := map[int]*app.WaitList{}
 	for _, queue := range queues {
 		waitLists[queue.ID] = app.NewWaitList()
 	}
