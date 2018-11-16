@@ -41,13 +41,13 @@ func createUser(dbConn *sqlx.DB, logger *zap.Logger) http.HandlerFunc {
 		account.Password = hash
 
 		repo := db.NewUsersRepo(dbConn)
-		err = repo.Create(account)
+		u, err := repo.Create(account)
 		if err != nil {
 			handleServerError(w, "failed saving user into db", err, logger)
 			return
 		}
 
-		render.JSON(w, r, Response{Info: "account created successfully"})
+		render.JSON(w, r, Response{Data: u, Info: "account created successfully"})
 	}
 }
 

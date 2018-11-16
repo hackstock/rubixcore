@@ -31,9 +31,13 @@ func TestCreateUserAccount_ShouldPass(t *testing.T) {
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	repo := NewUsersRepo(dbMock)
 
-	err = repo.Create(u)
+	saved, err := repo.Create(u)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if saved == nil {
+		t.Fatalf("expected user, got nil")
 	}
 
 	err = mock.ExpectationsWereMet()
@@ -64,9 +68,13 @@ func TestCreateUserAccount_ShouldFail(t *testing.T) {
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	repo := NewUsersRepo(dbMock)
 
-	err = repo.Create(u)
+	saved, err := repo.Create(u)
 	if err == nil {
 		t.Fatalf("expected error, got none")
+	}
+
+	if saved != nil {
+		t.Fatalf("expected nil, got %v", saved)
 	}
 
 	err = mock.ExpectationsWereMet()
@@ -208,7 +216,7 @@ func TestUpdateLastLoginUserAccount_ShouldPass(t *testing.T) {
 	}
 	defer db.Close()
 
-	id := 1
+	var id int64 = 1
 	mock.ExpectExec(query).
 		WithArgs(
 			id,
@@ -238,7 +246,7 @@ func TestUpdateLastLoginUserAccount_ShouldFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	id := 1
+	var id int64 = 1
 	mock.ExpectExec(query).
 		WithArgs(
 			id,

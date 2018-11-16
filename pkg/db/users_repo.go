@@ -8,7 +8,7 @@ import (
 
 // UserAccount models a user in the db
 type UserAccount struct {
-	ID          int        `db:"id" json:"id"`
+	ID          int64      `db:"id" json:"id"`
 	Username    string     `db:"username" json:"username"`
 	Password    string     `db:"password" json:"-"`
 	IsAdmin     bool       `db:"is_admin" json:"isAdmin"`
@@ -41,7 +41,7 @@ func (repo *UsersRepo) GetByUsername(username string) (*UserAccount, error) {
 }
 
 // UpdateLastLogin updates the last login date for the specified user
-func (repo *UsersRepo) UpdateLastLogin(id int) error {
+func (repo *UsersRepo) UpdateLastLogin(id int64) error {
 	query := "UPDATE user_accounts SET last_login_at = CURRENT_TIMESTAMP() WHERE id = ?"
 
 	_, err := repo.db.Exec(query, id)
@@ -50,12 +50,21 @@ func (repo *UsersRepo) UpdateLastLogin(id int) error {
 }
 
 // Create saves a UserAccount into the database
-func (repo *UsersRepo) Create(u *UserAccount) error {
+func (repo *UsersRepo) Create(u *UserAccount) (*UserAccount, error) {
 	query := "INSERT INTO user_accounts (username, password, is_admin) VALUES (?, ?, ?)"
 
-	_, err := repo.db.Exec(query, u.Username, u.Password, u.IsAdmin)
+	res, err := repo.db.Exec(query, u.Username, u.Password, u.IsAdmin)
+	if err != nil {
+		return nil, err
+	}
 
-	return err
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	u.ID = id
+	return u, nil
 }
 
 // GetAll fetches and returns all user accounts in the database
