@@ -11,7 +11,7 @@ type Customer struct {
 	ID        int64      `db:"id" json:"id"`
 	Msisdn    string     `db:"msisdn" json:"msisdn"`
 	Ticket    string     `db:"ticket" json:"ticket"`
-	QueueID   int        `db:"queue_id" json:"queueId"`
+	QueueID   int64      `db:"queue_id" json:"queueId"`
 	CreatedAt *time.Time `db:"created_at" json:"createdAt"`
 	ServedAt  *time.Time `db:"served_at" json:"servedAt"`
 }

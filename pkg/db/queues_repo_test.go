@@ -30,9 +30,13 @@ func TestCreateQueue_ShouldPass(t *testing.T) {
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	queuesRepo := NewQueuesRepo(dbMock)
 
-	err = queuesRepo.Create(q)
+	saved, err := queuesRepo.Create(q)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if saved == nil {
+		t.Fatalf("expected queue, got nil")
 	}
 
 	err = mock.ExpectationsWereMet()
@@ -62,9 +66,13 @@ func TestCreateQueue_ShouldFail(t *testing.T) {
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	queuesRepo := NewQueuesRepo(dbMock)
 
-	err = queuesRepo.Create(q)
+	saved, err := queuesRepo.Create(q)
 	if err == nil {
 		t.Fatalf("expected error, got none")
+	}
+
+	if saved != nil {
+		t.Fatalf("expected nil, got %v", saved)
 	}
 
 	err = mock.ExpectationsWereMet()

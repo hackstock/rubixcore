@@ -8,7 +8,7 @@ import (
 
 // Queue models a queue in the db
 type Queue struct {
-	ID          int        `db:"id" json:"id"`
+	ID          int64      `db:"id" json:"id"`
 	Name        string     `db:"name" json:"name"`
 	Description string     `db:"description" json:"description"`
 	IsActive    bool       `db:"is_active" json:"isActive"`
@@ -28,11 +28,19 @@ func NewQueuesRepo(db *sqlx.DB) *QueuesRepo {
 }
 
 // Create saves a queue into the database
-func (repo *QueuesRepo) Create(q *Queue) error {
+func (repo *QueuesRepo) Create(q *Queue) (*Queue, error) {
 	query := "INSERT INTO queues (name, description) VALUES (?, ?)"
-	_, err := repo.db.Exec(query, q.Name, q.Description)
+	res, err := repo.db.Exec(query, q.Name, q.Description)
+	if err != nil {
+		return nil, err
+	}
 
-	return err
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	q.ID = id
+	return q, nil
 }
 
 // GetAll fetches and returns all queues from the database
@@ -84,7 +92,7 @@ func (repo *QueuesRepo) Update(q *Queue) (*Queue, error) {
 		return nil, err
 	}
 
-	return repo.Get(q.ID)
+	return nil, nil
 }
 
 // Delete removes a queue from the database by id

@@ -24,7 +24,7 @@ func createCustomer(rubix *app.Rubix, dbConn *sqlx.DB, logger *zap.Logger) http.
 		repo := db.NewCustomersRepo(dbConn)
 		customer.Ticket = rubix.GenerateTicket()
 
-		err = repo.Create(&customer)
+		c, err := repo.Create(&customer)
 		if err != nil {
 			handleServerError(w, "failed creating customer", err, logger)
 			return
@@ -32,7 +32,7 @@ func createCustomer(rubix *app.Rubix, dbConn *sqlx.DB, logger *zap.Logger) http.
 
 		rubix.AddCustomerToWaitList(customer.QueueID, customer.Msisdn, customer.Ticket)
 
-		render.JSON(w, r, Response{Info: "customer created successfully"})
+		render.JSON(w, r, Response{Data: c, Info: "customer created successfully"})
 	}
 }
 

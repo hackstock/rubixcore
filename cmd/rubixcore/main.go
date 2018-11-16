@@ -82,10 +82,10 @@ func main() {
 	dbConn.SetMaxOpenConns(100)
 
 	queuesRepo := db.NewQueuesRepo(dbConn)
-	queues, err := queuesRepo.GetActive()
+	queues, err := queuesRepo.GetAll()
 	failOnError("failed fetching active queues", err)
 
-	waitLists := map[int]*app.WaitList{}
+	waitLists := map[int64]*app.WaitList{}
 	for _, queue := range queues {
 		waitLists[queue.ID] = app.NewWaitList()
 	}
