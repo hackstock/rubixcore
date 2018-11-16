@@ -8,7 +8,7 @@ import (
 
 // Customer models a customer in the database
 type Customer struct {
-	ID        int        `db:"id" json:"id"`
+	ID        int64      `db:"id" json:"id"`
 	Msisdn    string     `db:"msisdn" json:"msisdn"`
 	Ticket    string     `db:"ticket" json:"ticket"`
 	QueueID   int        `db:"queue_id" json:"queueId"`
@@ -28,12 +28,21 @@ func NewCustomersRepo(db *sqlx.DB) *CustomersRepo {
 }
 
 // Create saves a customer into the database
-func (repo *CustomersRepo) Create(c *Customer) error {
+func (repo *CustomersRepo) Create(c *Customer) (*Customer, error) {
 	query := "INSERT INTO customers (msisdn, ticket, queue_id) VALUES (?, ?, ?)"
 
-	_, err := repo.db.Exec(query, c.Msisdn, c.Ticket, c.QueueID)
+	res, err := repo.db.Exec(query, c.Msisdn, c.Ticket, c.QueueID)
+	if err != nil {
+		return nil, err
+	}
 
-	return err
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	c.ID = id
+	return c, nil
 }
 
 // GetAll fetches and return all customers from the database

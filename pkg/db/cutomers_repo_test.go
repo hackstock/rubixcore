@@ -31,9 +31,13 @@ func TestCreateCustomer_ShouldPass(t *testing.T) {
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	customersRepo := NewCustomersRepo(dbMock)
 
-	err = customersRepo.Create(c)
+	saved, err := customersRepo.Create(c)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if saved == nil {
+		t.Fatalf("expected a customer, got nil")
 	}
 
 	err = mock.ExpectationsWereMet()
@@ -64,9 +68,13 @@ func TestCreateCustomer_ShouldFail(t *testing.T) {
 	dbMock := sqlx.NewDb(db, "sqlmock")
 	customersRepo := NewCustomersRepo(dbMock)
 
-	err = customersRepo.Create(c)
+	saved, err := customersRepo.Create(c)
 	if err == nil {
 		t.Fatalf("expected error, got none")
+	}
+
+	if saved != nil {
+		t.Fatalf("expected nil, got %v", saved)
 	}
 
 	err = mock.ExpectationsWereMet()
