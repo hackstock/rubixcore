@@ -90,7 +90,8 @@ func main() {
 		waitLists[queue.ID] = app.NewWaitList()
 	}
 
-	rubix := app.NewRubix(waitLists, logger)
+	publisher := app.NewSMSPublisher(brokerConn)
+	rubix := app.NewRubix(waitLists, publisher, logger)
 
 	listener, err := net.Listen("tcp4", fmt.Sprintf(":%d", env.Port))
 	if err != nil {

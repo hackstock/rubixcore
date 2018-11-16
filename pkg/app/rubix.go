@@ -8,6 +8,10 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	smsTaskQueue = "sms_task_queue"
+)
+
 // Rubix keeps track of internal state of the system in realtime
 // 'WaitLists' is a mapping between queues defined in the db and
 // their corresponding backing waitlist.
@@ -15,28 +19,35 @@ import (
 // 'nextTicketNumber' tracks the ticket number to be issued to the
 // next customer who joins a queue
 type Rubix struct {
-	WaitLists        map[int64]*WaitList
+	waitLists        map[int64]*WaitList
 	nextTicketNumber int
 	lock             sync.RWMutex
+	publisher        Publisher
 	logger           *zap.Logger
 }
 
+// Publisher publishes messages to some destinations
+type Publisher interface {
+	Publish(sms, queueName string) error
+}
+
 // NewRubix returns a pointer to a new State
-func NewRubix(waitLists map[int64]*WaitList, logger *zap.Logger) *Rubix {
+func NewRubix(waitLists map[int64]*WaitList, publisher Publisher, logger *zap.Logger) *Rubix {
 	return &Rubix{
-		WaitLists:        waitLists,
+		waitLists:        waitLists,
 		nextTicketNumber: 1,
+		publisher:        publisher,
 		logger:           logger,
 	}
 }
 
 // Reset clears all application data
 func (r *Rubix) Reset() {
-	r.WaitLists = map[int64]*WaitList{}
+	r.waitLists = map[int64]*WaitList{}
 	r.lock.Lock()
 	r.nextTicketNumber = 1
 	r.lock.Unlock()
-	r.logger.Info("application state reset", zap.Int("next_ticket_number", r.nextTicketNumber), zap.Any("wait_lists", r.WaitLists))
+	r.logger.Info("application state reset", zap.Int("next_ticket_number", r.nextTicketNumber), zap.Any("wait_lists", r.waitLists))
 }
 
 // GenerateTicket returns the next ticket identifier
@@ -50,24 +61,33 @@ func (r *Rubix) GenerateTicket() string {
 
 // AddCustomerToWaitList adds a customer info to the tail of a waitlist
 // identied by the given queueId
-func (r *Rubix) AddCustomerToWaitList(queueID int64, msisdn, ticket string) {
+func (r *Rubix) AddCustomerToWaitList(queueID int64, msisdn, ticket string) error {
 	customerInfo := &CustomerInfo{Msisdn: msisdn, Ticket: ticket}
 
-	_, ok := r.WaitLists[queueID]
+	_, ok := r.waitLists[queueID]
 	if !ok {
 		r.logger.Info("creating waitlist for new queue", zap.Int64("queue_id", queueID))
-		r.WaitLists[queueID] = NewWaitList()
+		r.waitLists[queueID] = NewWaitList()
 	}
 
-	r.WaitLists[queueID].Enqueue(customerInfo)
+	msg := fmt.Sprintf("Ticket number %s. Kindly wait for your turn.", ticket)
+	smsPayload := fmt.Sprintf("%s#%s", msisdn, msg)
+	err := r.publisher.Publish(smsPayload, smsTaskQueue)
+	if err != nil {
+		return err
+	}
+
+	r.waitLists[queueID].Enqueue(customerInfo)
 	r.logger.Info("customer added to queue", zap.Any("customer_info", customerInfo), zap.Int64("queueID", queueID))
+
+	return nil
 }
 
 // NotifyNextCustomer deques a customer and notifies him of his
 // turn to be served at a specific counter and returns the
 // ID of the customer
 func (r *Rubix) NotifyNextCustomer(queueID, counterID int64) int {
-	customer := r.WaitLists[queueID].Deque()
+	customer := r.waitLists[queueID].Deque()
 	r.logger.Info("customer notified of turn", zap.Any("customer", customer), zap.Int64("counter", counterID))
 	return 1
 }

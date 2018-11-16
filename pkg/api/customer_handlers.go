@@ -30,7 +30,11 @@ func createCustomer(rubix *app.Rubix, dbConn *sqlx.DB, logger *zap.Logger) http.
 			return
 		}
 
-		rubix.AddCustomerToWaitList(customer.QueueID, customer.Msisdn, customer.Ticket)
+		err = rubix.AddCustomerToWaitList(customer.QueueID, customer.Msisdn, customer.Ticket)
+		if err != nil {
+			handleServerError(w, "failed adding customer to queue", err, logger)
+			return
+		}
 
 		render.JSON(w, r, Response{Data: c, Info: "customer created successfully"})
 	}
