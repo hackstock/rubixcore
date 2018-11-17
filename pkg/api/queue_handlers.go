@@ -89,7 +89,7 @@ func deleteQueue(dbConn *sqlx.DB, logger *zap.Logger) http.HandlerFunc {
 		}
 
 		repo := db.NewQueuesRepo(dbConn)
-		err = repo.Delete(queueID)
+		err = repo.Delete(int64(queueID))
 		if err != nil {
 			handleServerError(w, "failed updating queue", err, logger)
 			return

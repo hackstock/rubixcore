@@ -70,7 +70,7 @@ func (repo *QueuesRepo) GetActive() ([]*Queue, error) {
 }
 
 // Get fetches and returns a queue by id
-func (repo *QueuesRepo) Get(id int) (*Queue, error) {
+func (repo *QueuesRepo) Get(id int64) (*Queue, error) {
 	query := "SELECT q.* FROM queues AS q WHERE q.id = ?"
 
 	q := new(Queue)
@@ -92,11 +92,11 @@ func (repo *QueuesRepo) Update(q *Queue) (*Queue, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return repo.Get(q.ID)
 }
 
 // Delete removes a queue from the database by id
-func (repo *QueuesRepo) Delete(id int) error {
+func (repo *QueuesRepo) Delete(id int64) error {
 	query := "DELETE FROM queues WHERE id = ?"
 
 	_, err := repo.db.Exec(query, id)

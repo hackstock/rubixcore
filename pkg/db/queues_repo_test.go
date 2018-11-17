@@ -213,7 +213,7 @@ func TestGetQueue_ShouldPass(t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 	defer db.Close()
-	id := 1
+	id := int64(1)
 
 	mock.ExpectQuery(query).WithArgs(id).WillReturnRows(
 		sqlmock.NewRows([]string{"id", "name", "description", "is_active", "created_at"}).
@@ -243,7 +243,7 @@ func TestGetQueue_ShouldFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	id := 1
+	id := int64(1)
 
 	mock.ExpectQuery(query).
 		WithArgs(id).
@@ -276,7 +276,7 @@ func TestDeleteQueue_ShouldPass(t *testing.T) {
 	}
 	defer db.Close()
 
-	id := 1
+	id := int64(1)
 
 	mock.ExpectExec(query).
 		WithArgs(
@@ -307,7 +307,7 @@ func TestDeleteQueue_ShouldFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	id := 1
+	id := int64(1)
 
 	mock.ExpectExec(query).
 		WithArgs(
@@ -338,7 +338,7 @@ func TestUpdateQueue_ShouldPass(t *testing.T) {
 	}
 	defer db.Close()
 
-	q := &Queue{ID: 1, Name: "test queue", Description: "test description", IsActive: true}
+	q := &Queue{ID: int64(1), Name: "test queue", Description: "test description", IsActive: true}
 
 	mock.ExpectExec(query).
 		WithArgs(
