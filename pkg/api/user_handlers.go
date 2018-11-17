@@ -26,11 +26,22 @@ func getAllUsers(dbConn *sqlx.DB, logger *zap.Logger) http.HandlerFunc {
 
 func createUser(dbConn *sqlx.DB, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		account := new(db.UserAccount)
-		err := json.NewDecoder(r.Body).Decode(account)
+		var payload = struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+			IsAdmin  bool   `json:"isAdmin"`
+		}{}
+
+		err := json.NewDecoder(r.Body).Decode(&payload)
 		if err != nil {
 			handleBadRequest(w, "failed decoding request payload", err, logger)
 			return
+		}
+
+		account := &db.UserAccount{
+			Username: payload.Username,
+			Password: payload.Password,
+			IsAdmin:  payload.IsAdmin,
 		}
 
 		hash, err := hashPassword(account.Password)
@@ -66,7 +77,6 @@ func authenticate(dbConn *sqlx.DB, logger *zap.Logger) http.HandlerFunc {
 
 		repo := db.NewUsersRepo(dbConn)
 		account, err := repo.GetByUsername(credentials.Username)
-		logger.Info("found user", zap.Any("user", account))
 		if err != nil {
 			handleServerError(w, "failed fetching account", err, logger)
 			return
