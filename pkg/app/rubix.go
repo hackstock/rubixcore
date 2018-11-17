@@ -26,9 +26,16 @@ type Rubix struct {
 	logger           *zap.Logger
 }
 
-// Publisher publishes messages to some destinations
+// Publisher publishes messages to a queue in a message broker
 type Publisher interface {
 	Publish(sms, queueName string) error
+}
+
+// SMSWorker consumes messages from a queue in a message broker,
+// parses the messages, and makes HTTP calls to send SMS via
+// configured SMS gateways
+type SMSWorker interface {
+	Run(queueName string)
 }
 
 // NewRubix returns a pointer to a new State
@@ -48,6 +55,11 @@ func (r *Rubix) Reset() {
 	r.nextTicketNumber = 1
 	r.lock.Unlock()
 	r.logger.Info("application state reset", zap.Int("next_ticket_number", r.nextTicketNumber), zap.Any("wait_lists", r.waitLists))
+}
+
+// RegisterSMSWorker starts a worker tasks that sends SMS to customers
+func (r *Rubix) RegisterSMSWorker(worker SMSWorker) {
+	worker.Run(smsTaskQueue)
 }
 
 // GenerateTicket returns the next ticket identifier

@@ -29,14 +29,17 @@ const (
 )
 
 var env = struct {
-	Port             int    `envconfig:"PORT" required:"true"`
-	Environment      string `envconfig:"ENVIRONMENT" default:"development"`
-	TicketsResetTime string `envconfig:"TICKETS_RESET_TIME" required:"true"`
-	ServiceDSN       string `envconfig:"SERVICE_DSN" required:"true"`
-	RabbitMQURL      string `envconfig:"RABBITMQ_URL" required:"true"`
-	JWTIssuer        string `envconfig:"JWT_ISSUER" required:"true"`
-	JWTSecret        string `envconfig:"JWT_SECRET" required:"true"`
-	Company          string `envconfig:"COMPANY"`
+	Port              int    `envconfig:"PORT" required:"true"`
+	Environment       string `envconfig:"ENVIRONMENT" default:"development"`
+	TicketsResetTime  string `envconfig:"TICKETS_RESET_TIME" required:"true"`
+	ServiceDSN        string `envconfig:"SERVICE_DSN" required:"true"`
+	RabbitMQURL       string `envconfig:"RABBITMQ_URL" required:"true"`
+	JWTIssuer         string `envconfig:"JWT_ISSUER" required:"true"`
+	JWTSecret         string `envconfig:"JWT_SECRET" required:"true"`
+	Company           string `envconfig:"COMPANY"`
+	SMSSenderID       string `envconfig:"SMS_SENDER_ID"`
+	SMSSenderUsername string `envconfig:"SMS_SENDER_USERNAME"`
+	SMSSenderPassword string `envconfig:"SMS_SENDER_PASSWORD"`
 }{}
 
 func init() {
@@ -92,6 +95,8 @@ func main() {
 
 	publisher := app.NewSMSPublisher(brokerConn)
 	rubix := app.NewRubix(waitLists, publisher, logger)
+	config := app.NewSmsGatewayConfig(env.SMSSenderID, env.SMSSenderUsername, env.SMSSenderPassword)
+	rubix.RegisterSMSWorker(app.NewNandiSMSWorker(brokerConn, config, logger))
 
 	listener, err := net.Listen("tcp4", fmt.Sprintf(":%d", env.Port))
 	if err != nil {
